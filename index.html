@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIRST PROJECT | CS2 Портал</title>
+    <style>
+        :root { 
+            --bg-main: #040712; --bg-card: #081022; --bg-sidebar: #050a16; 
+            --primary: #00bbff; --primary-glow: rgba(0, 187, 255, 0.45); 
+            --accent-orange: #ff7b00; --text-main: #7a8fae; 
+            --text-bright: #ffffff; --border-color: #121f38; 
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body { background-color: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', Roboto, sans-serif; display: flex; min-height: 100vh; overflow-x: hidden; background-image: radial-gradient(circle at 75% 15%, #0b1836 0%, var(--bg-main) 75%); }
+        @keyframes pageFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 187, 255, 0.6); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 187, 255, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 187, 255, 0); } }
+        
+        .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 30px 24px; position: fixed; height: 100vh; z-index: 1000; }
+        .logo { font-size: 24px; font-weight: 900; color: var(--text-bright); letter-spacing: 1px; margin-bottom: 35px; text-transform: uppercase; }
+        .logo span { color: var(--primary); text-shadow: 0 0 15px var(--primary-glow); }
+        .menu-list { display: flex; flex-direction: column; gap: 14px; list-style: none; }
+        .menu-btn { width: 100%; background: transparent; border: 1px solid transparent; color: var(--text-main); padding: 12px 18px; text-align: left; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; border-radius: 8px; transition: 0.3s ease; }
+        .menu-btn:hover, .menu-btn.active { color: var(--text-bright); background: rgba(0, 187, 255, 0.05); border-color: rgba(0, 187, 255, 0.15); text-shadow: 0 0 8px var(--primary-glow); }
+        .menu-btn.active { border-left: 4px solid var(--primary); padding-left: 16px; }
+        .menu-btn.btn-staff-recruit { border: 1px solid rgba(0, 255, 136, 0.15); color: #00ff88; }
+        .menu-btn.btn-staff-recruit:hover, .menu-btn.btn-staff-recruit.active { background: rgba(0, 255, 136, 0.04); border-color: #00ff88; text-shadow: 0 0 8px rgba(0, 255, 136, 0.4); }
+        .menu-btn.btn-staff-recruit.active { border-left: 4px solid #00ff88; }
+        .menu-btn.btn-tickets-panel { border: 1px solid rgba(255, 123, 0, 0.15); color: var(--accent-orange); }
+        .menu-btn.btn-tickets-panel:hover, .menu-btn.btn-tickets-panel.active { background: rgba(255, 123, 0, 0.04); border-color: var(--accent-orange); text-shadow: 0 0 8px rgba(255, 123, 0, 0.4); }
+        .menu-btn.btn-tickets-panel.active { border-left: 4px solid var(--accent-orange); }
+        .main-content { margin-left: 260px; flex: 1; padding: 40px 4%; min-width: 0; position: relative; z-index: 10; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 45px; background: var(--bg-card); padding: 16px 28px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 25px rgba(0,0,0,0.3); height: 74px; }
+        .top-bar-right-zone { display: flex; align-items: center; gap: 16px; justify-content: flex-end; }
+        #steamArea { display: flex; align-items: center; justify-content: flex-end; min-width: 320px; height: 50px; }
+        .notification-bell-btn { width: 38px; height: 38px; background: rgba(5, 10, 22, 0.6); border: 1px solid var(--border-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: 0.3s ease; flex-shrink: 0; }
+        .notification-bell-btn:hover { border-color: var(--primary); box-shadow: 0 0 12px var(--primary-glow); }
+        .notification-bell-btn svg { width: 18px; height: 18px; fill: var(--text-main); transition: 0.3s; }
+        .notification-bell-btn:hover svg { fill: var(--text-bright); }
+        .notification-dot-indicator { position: absolute; top: 2px; right: 2px; width: 8px; height: 8px; background: #ff3b30; border-radius: 50%; box-shadow: 0 0 8px #ff3b30; }
+        
+        .user-profile-block { display: flex; align-items: center; gap: 14px; background: rgba(14, 26, 54, 0.4); padding: 6px 16px; border-radius: 10px; border: 1px solid var(--border-color); width: 100%; height: 100%; transition: 0.3s ease; position: relative; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 8px; border: 2px solid var(--primary); box-shadow: 0 0 10px var(--primary-glow); background-size: cover; flex-shrink: 0; }
+        .user-info-text { display: flex; flex-direction: column; overflow: hidden; flex: 1; }
+        .user-name-title { color: #fff; font-size: 13px; font-weight: 800; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+        .user-coin-balance { font-size: 11px; color: #ffca28; font-weight: bold; margin-top: 1px; display: flex; align-items: center; gap: 4px; }
+        .coin-icon-gold { color: #ffca28; font-weight: 900; text-shadow: 0 0 8px rgba(255,202,40,0.5); }
+        .btn-deposit-fast { background: var(--primary); color: #000; border: none; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 4px; cursor: pointer; text-transform: uppercase; transition: 0.2s; margin-left: 6px; }
+        .btn-deposit-fast:hover { background: #fff; box-shadow: 0 0 10px #fff; }
+        .user-badge-role { background: rgba(255, 123, 0, 0.15); color: var(--accent-orange); border: 1px solid var(--accent-orange); font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; flex-shrink: 0; }
+        .btn-steam-login { background: rgba(0, 187, 255, 0.08); color: var(--primary); border: 1px solid var(--primary); padding: 10px 22px; font-weight: bold; border-radius: 8px; cursor: pointer; text-transform: uppercase; font-size: 12px; transition: 0.3s; box-shadow: 0 0 10px var(--primary-glow); white-space: nowrap; text-decoration: none; }
+        .btn-steam-login:hover { background: var(--primary); color: #000; box-shadow: 0 0 20px var(--primary); }
+        
+        .main-title-hub { font-size: 28px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 40px; }
+        .main-title-hub span { color: var(--accent-orange); }
+        .page { display: none; width: 100%; opacity: 0; }
+        .page.active { display: block; opacity: 1; animation: pageFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .section-title { font-size: 18px; color: #fff; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 1.5px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-top: 20px; }
+        .modes-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 24px; }
+        @media (max-width: 1500px) { .modes-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 1100px) { .modes-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 700px) { .modes-grid { grid-template-columns: 1fr; } }
+        .mode-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; height: 350px; position: relative; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; justify-content: flex-end; padding: 35px 24px; transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .mode-card:hover { border-color: var(--primary); box-shadow: 0 0 30px var(--primary-glow); transform: translateY(-5px); }
+        .mode-info { position: relative; z-index: 2; text-align: center; width: 100%; margin-bottom: 2px; display: flex; flex-direction: column; align-items: center; }
+        .mode-tag-badge { font-size: 9px; font-weight: 900; color: #fff; background: rgba(255,123,0,0.25); border: 1px solid var(--accent-orange); padding: 2px 10px; border-radius: 4px; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .mode-tag-badge.sniper-tag { background: rgba(0,187,255,0.15); border-color: var(--primary); }
+        .mode-name-classic { color: #fff; font-size: 22px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+        .mode-online { font-size: 12px; color: var(--primary); font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 6px; }
+        .mode-online::before { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--primary); border-radius: 50%; animation: pulse 2s infinite; }
+        .servers-container { display: none; opacity: 0; transition: opacity 0.3s ease; }
+        .servers-container.active { display: block; opacity: 1; }
+        .btn-back-hub { background: rgba(0, 187, 255, 0.08); color: var(--primary); border: 1px solid var(--primary); padding: 10px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 12px; margin-bottom: 25px; transition: 0.3s; }
+        .btn-back-hub:hover { background: var(--primary); color: #000; }
+        .server-row { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 22px 35px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+        .item-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 0; text-align: left; transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .item-card::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 30%, transparent 10%, rgba(4,7,18,0.95) 80%); z-index: 2; pointer-events: none; transition: 0.4s; }
+        .item-card:hover { transform: translateY(-5px); }
+        .item-card:hover:after { opacity: 0.4; }
+        .item-card:nth-child(1):hover { border-color: #00bbff; box-shadow: inset 0 0 40px rgba(0,187,255,0.15), 0 0 25px rgba(0,187,255,0.2); }
+        .item-card:nth-child(2):hover { border-color: #00ff88; box-shadow: inset 0 0 40px rgba(0,255,136,0.15), 0 0 25px rgba(0,255,136,0.2); }
+        .item-card:nth-child(3):hover { border-color: #ffaa00; box-shadow: inset 0 0 40px rgba(255,170,0,0.15), 0 0 25px rgba(255,170,0,0.2); }
+        .item-card:nth-child(4):hover { border-color: #e100ff; box-shadow: inset 0 0 40px rgba(225,0,255,0.15), 0 0 25px rgba(225,0,255,0.2); }
+        .item-card:nth-child(5):hover { border-color: #ff0055; box-shadow: inset 0 0 40px rgba(255,0,85,0.15), 0 0 25px rgba(255,0,85,0.2); }
+        .item-card:nth-child(6):hover { border-color: #ffea00; box-shadow: inset 0 0 40px rgba(255,234,0,0.15), 0 0 25px rgba(255,234,0,0.2); }
+        .shop-card-banner { width: 100%; height: 160px; position: relative; display: flex; align-items: center; padding-left: 24px; overflow: hidden; border-bottom: 1px solid var(--border-color); background: #050b18; background-image: linear-gradient(45deg, #050b18 40%, #0c1836 100%); }
+        
+        .shop-card-banner::before { content: ''; position: absolute; right: 10px; bottom: 0; width: 130px; height: 150px; background-size: contain; background-repeat: no-repeat; background-position: bottom right; z-index: 3; transition: 0.4s ease; }
+        .banner-vip::before { background-image: url('https://pngadmin.com'); filter: drop-shadow(0 0 20px rgba(0,187,255,0.35)); }
+        .banner-svip::before { background-image: url('https://pngadmin.com'); filter: drop-shadow(0 0 20px rgba(0,255,136,0.35)); }
+        .banner-premium::before { background-image: url('https://pngadmin.com'); filter: drop-shadow(0 0 20px rgba(255,170,0,0.35)); }
+        .banner-moder::before { background-image: url('https://pngadmin.com'); filter: drop-shadow(0 0 20px rgba(225,0,255,0.35)); }
+        .banner-admin::before { background-image: url('https://pngadmin.com'); filter: drop-shadow(0 0 20px rgba(255,0,85,0.35)); }
+        .banner-sponsor::before { background-image: url('https://pngadmin.com'); filter: drop-shadow(0 0 25px rgba(255,234,0,0.45)); }
+        .item-card:hover .shop-card-banner::before { transform: scale(1.08) translateX(-5px); }
+        
+        .banner-text-3d { font-size: 32px; font-weight: 900; text-transform: uppercase; letter-spacing: 4px; position: relative; z-index: 5; font-style: italic; font-family: 'Arial Black', Impact, sans-serif; -webkit-text-stroke: 1px rgba(255,255,255,0.6); color: transparent; background: linear-gradient(to bottom, #ffffff 30%, #b2bec3 90%); -webkit-background-clip: text; background-clip: text; }
+        .banner-vip .banner-text-3d { filter: drop-shadow(0 0 10px #00bbff); }
+        .banner-svip .banner-text-3d { filter: drop-shadow(0 0 10px #00ff88); }
+        .banner-premium .banner-text-3d { filter: drop-shadow(0 0 10px #ffaa00); }
+        .banner-moder .banner-text-3d { filter: drop-shadow(0 0 10px #e100ff); }
+        .banner-admin .banner-text-3d { filter: drop-shadow(0 0 10px #ff0055); }
+        .banner-sponsor .banner-text-3d { filter: drop-shadow(0 0 10px #ffea00); }
+        .shop-card-body { padding: 24px; display: flex; flex-direction: column; flex: 1; position: relative; z-index: 5; }
+        .priv-features-list { list-style: none; margin-bottom: 25px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #a4b3d6; }
+        .priv-features-list li { display: flex; align-items: center; gap: 8px; }
+        .priv-features-list li::before { content: '✓'; color: #00ff88; font-weight: bold; }
+        .card-price-tag { font-size: 24px; color: #fff; font-weight: 800; margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border-color); display: flex; align-items: center; gap: 6px; margin-bottom: 15px; }
+        .card-price-tag span { font-size: 12px; color: var(--text-main); font-weight: normal; }
+        
+        .btn-buy-priv { width: 100%; padding: 14px; font-size: 13px; font-weight: 800; text-transform: uppercase; border-radius: 8px; cursor: pointer; transition: 0.3s; border: 1px solid transparent; display: block; clear: both; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        .btn-buy-priv:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.6); filter: brightness(1.2); }
+        .admin-flex { display: flex; gap: 24px; margin-bottom: 35px; width: 100%; flex-direction: row; }
+        .admin-card { background: var(--bg-card); border: 1px solid var(--border-color); padding: 25px; text-align: center; flex: 1; border-radius: 12px; position: relative; transition: 0.4s ease; overflow: hidden; }
+        .admin-card::before, .admin-card::after { content: ''; position: absolute; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--primary), transparent); opacity: 0; transition: transform 0.6s ease, opacity 0.4s; }
+        .admin-card::before { top: 0; transform: scaleX(0); }
+        .admin-card::after { bottom: 0; transform: scaleX(0); }
+        .admin-card:hover { border-color: var(--primary); box-shadow: 0 0 25px var(--primary-glow); transform: translateY(-3px); }
+        .admin-card:hover::before { opacity: 1; transform: scaleX(1.5) translateY(-2px); }
+        .admin-card:hover::after { opacity: 1; transform: scaleX(1.5) translateY(2px); }
+        .admin-role { font-size: 11px; text-transform: uppercase; font-weight: 700; padding: 5px 14px; border-radius: 20px; display: inline-block; margin-top: 10px; }
+        .role-s1mtry { background: rgba(0, 136, 255, 0.1); color: #0088ff; border: 1px solid #0088ff; }
+        .role-solonik { background: rgba(255, 153, 0, 0.1); color: #ff9900; border: 1px solid #ff9900; }
+        .role-wiki { background: rgba(0, 255, 204, 0.1); color: #00ffcc; border: 1px solid #00ffcc; }
+        
+        .skin-page-layout { display: flex; gap: 30px; margin-top: 20px; }
+        .skin-left-sidebar-menu { width: 220px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+        .skin-side-category-btn { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px 16px; border-radius: 8px; font-size: 12px; font-weight: bold; text-align: left; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
+        .skin-side-category-btn:hover, .skin-side-category-btn.active { border-color: #ff7b00; color: #fff; background: rgba(255,123,0,0.05); box-shadow: 0 0 15px rgba(255,123,0,0.1); }
+        .skin-btn-clear-inv { border-color: rgba(255,0,85,0.3); color: #ff0055; background: rgba(255,0,85,0.02); margin-top: 15px; justify-content: center; }
+        .skin-btn-clear-inv:hover { border-color: #ff0055; background: rgba(255,0,85,0.08); box-shadow: 0 0 15px rgba(255,0,85,0.1); color: #fff; }
+        .skin-right-catalog-zone { flex: 1; }
+        .skin-top-center-tabs { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; background: rgba(5,10,22,0.6); padding: 6px; border-radius: 10px; width: max-content; margin-left: auto; margin-right: auto; border: 1px solid var(--border-color); }
+        .skin-center-tab-btn { background: transparent; border: none; color: var(--text-main); padding: 10px 24px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        .skin-center-tab-btn:hover, .skin-center-tab-btn.active { background: #fff; color: #000; font-weight: 900; }
+        .skins-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; }
+        .skin-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; text-align: center; cursor: pointer; transition: 0.2s ease; position: relative; overflow: hidden; display: flex; flex-direction: column; height: 160px; justify-content: center; align-items: center; }
+        .skin-card:hover { border-color: var(--primary); box-shadow: 0 0 20px rgba(0,187,245,0.15); transform: translateY(-2px); }
+        .skin-img-box-placeholder { font-size: 26px; margin-bottom: 12px; opacity: 0.8; }
+        .skin-weapon-title-label { font-size: 11px; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .custom-table { width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); }
+        .custom-table th, .custom-table td { padding: 16px 24px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .custom-table th { background: rgba(0,0,0,0.3); color: #fff; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        .custom-form-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; max-width: 500px; }
+        .custom-form-input { background: #050a16; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px 16px; color: #fff; font-size: 14px; outline: none; transition: 0.3s; }
+        .custom-form-input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0,187,255,0.1); }
+        .rules-sub-title { font-size: 14px; color: #fff; margin: 20px 0 15px 0; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+        .rules-sub-title::before { content: '▪'; color: var(--primary); font-size: 20px; }
+        .notification-toast { position: fixed; bottom: 30px; right: -400px; background: var(--bg-sidebar); border-left: 4px solid var(--primary); padding: 18px 28px; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index: 10000; transition: 0.4s ease; color: #fff; font-size: 14px; font-weight: bold; }
+        .notification-toast.show { right: 30px; }
+        .project-footer-zone { margin-top: 60px; padding: 40px 0 20px 0; border-top: 1px solid var(--border-color); display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .footer-column-block { display: flex; flex-direction: column; gap: 16px; }
+        .footer-column-title { font-size: 18px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .footer-navigation-link { color: var(--text-main); text-decoration: none; font-size: 14px; transition: 0.2s ease; display: flex; align-items: center; justify-content: space-between; max-width: 320px; padding-bottom: 4px; }
+        .footer-navigation-link:hover { color: #fff; transform: translateX(3px); }
+        .footer-navigation-link span { color: var(--text-main); font-weight: bold; opacity: 0.5; }
+        .footer-navigation-link:hover span { color: var(--primary); opacity: 1; }
+        .footer-status-badge { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #00ff88; font-weight: bold; text-shadow: 0 0 8px rgba(0,255,136,0.2); }
+        .footer-status-dot { width: 8px; height: 8px; background: #00ff88; border-radius: 50%; animation: pulse 2s infinite; }
+    </style>
+</head>
+<body>
+<div id="toast" class="notification-toast"></div>
+<div class="sidebar"><div class="logo">First<span>Project</span></div><ul class="menu-list">
+<li><button class="menu-btn active" onclick="switchPage('main', this)">Главная</button></li>
+<li><button class="menu-btn" onclick="switchPage('shop', this)">Магазин</button></li>
+<li><button class="menu-btn" onclick="switchPage('skins', this)">Скинченджер</button></li>
+<li><button class="menu-btn" onclick="switchPage('stats', this)">Топ игроков</button></li>
+<li><button class="menu-btn" onclick="switchPage('clans', this)">Кланы</button></li>
+<li><button class="menu-btn btn-staff-recruit" onclick="switchPage('recruit', this)">Набор (14+)</button></li>
+<li><button class="menu-btn btn-tickets-panel" onclick="switchPage('tickets', this)">Тикеты</button></li>
+<li><button class="menu-btn" onclick="switchPage('rules', this)">Правила</button></li>
+</ul></div>
+<div class="main-content">
+<div class="top-bar"><div style="color:var(--text-main); font-weight:bold; letter-spacing: 0.5px; text-transform: uppercase; font-size:13px;">Premium Игровые Серверы</div>
+<div class="top-bar-right-zone">
+    <div class="notification-bell-btn" onclick="showToast('🔔 Новых системных уведомлений нет')">
+        <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+        <div class="notification-dot-indicator"></div>
+    </div>
+    <div id="steamArea"><button class="btn-steam-login" onclick="redirectToSteam()">Войти через Steam</button></div>
+</div></div>
+<div id="page-main" class="page active"><h1 class="main-title-hub">Выберите <span>режим игры</span></h1>
+<div id="modesSelector" class="modes-grid">
+<div class="mode-card mode-public" onclick="openMode('public')"><div class="mode-info"><span class="mode-tag-badge">Classic</span><h2 class="text-white drop-shadow-md">PUBLIC</h2><div class="mode-online">В сети</div></div></div>
+<div class="mode-card mode-awp" onclick="openMode('awp')"><div class="mode-info"><span class="mode-tag-badge sniper-tag">Sniper</span><div class="mode-name-classic">Awp Only</div><div class="mode-online">В сети</div></div></div>
+<div class="mode-card" style="cursor:default; background:rgba(0,0,0,0.25); border-style: dashed;"><div class="mode-info" style="opacity:0.25;"><div class="mode-name-classic" style="font-size:16px;">Скоро</div></div></div>
+<div class="mode-card" style="cursor:default; background:rgba(0,0,0,0.25); border-style: dashed;"><div class="mode-info" style="opacity:0.25;"><div class="mode-name-classic" style="font-size:16px;">Скоро</div></div></div>
+<div class="mode-card" style="cursor:default; background:rgba(0,0,0,0.25); border-style: dashed;"><div class="mode-info" style="opacity:0.25;"><div class="mode-name-classic" style="font-size:16px;">Скоро</div></div></div>
+</div>
+<div id="servers-public" class="servers-container"><button class="btn-back-hub" onclick="closeMode()">⬅ Назад к режимам</button><div class="section-title">Серверы режима PUBLIC</div><p style="color:var(--text-main); font-style:italic;">Игровые паблик-серверы сейчас подготавливаются к запуску на хостинге Anonix.</p></div>
+<div id="servers-awp" class="servers-container"><button class="btn-back-hub" onclick="closeMode()">⬅ Назад к режимам</button><div class="section-title">Серверы режима AWP</div><p style="color:var(--text-main); font-style:italic;">Игровые AWP-серверы сейчас настраиваются тех. администрацией проекта.</p></div></div>
+<div id="page-shop" class="page"><div class="section-title">Магазин онлайн-привилегий</div><div class="cards-grid">
+<div class="item-card"><div class="shop-card-banner banner-vip"><div class="banner-text-3d">VIP STATUS</div></div><div class="shop-card-body"><ul class="priv-features-list"><li>Тег [VIP] перед ником в чате</li><li>Уникальный цвет сообщений</li><li>+10% к получению игровых кредитов</li></ul><div class="card-price-tag"><span class="coin-icon-gold">₣</span> 150 FC <span>/ мес</span></div><button class="btn-buy-priv" style="background: linear-gradient(90deg, rgba(0,187,255,0.15), rgba(0,187,255,0.35)); border-color: #00bbff; color: #fff; text-shadow: 0 0 10px #00bbff;" onclick="showToast('🛒 Недостаточно First Coins! Пополните баланс в личном кабинете')">Купить купон</button></div></div>
+<div class="item-card"><div class="shop-card-banner banner-svip"><div class="banner-text-3d">S-VIP TIER</div></div><div class="shop-card-body"><ul class="priv-features-list"><li>Все функции обычной VIP</li><li>Эффект лазерных трейсеров пуль</li><li>+15 HP при старте каждого раунда</li><li>Доступ к меню кастомных перчаток</li></ul><div class="card-price-tag"><span class="coin-icon-gold">₣</span> 250 FC <span>/ мес</span></div><button class="btn-buy-priv" style="background: linear-gradient(90deg, rgba(0,255,136,0.15), rgba(0,255,136,0.35)); border-color: #00ff88; color: #fff; text-shadow: 0 0 10px #00ff88;" onclick="showToast('🛒 Недостаточно First Coins! Пополните баланс в личном кабинете')">Купить купон</button></div></div>
+<div class="item-card premium-tier"><div class="shop-card-banner banner-premium"><div class="banner-text-3d">PREMIUM</div></div><div class="shop-card-body"><ul class="priv-features-list"><li>Префикс [PREMIUM] золотым цвесом</li><li>Регенерация 5 брони каждые 3 секунды</li><li>+25 HP и $500 за убийство в голову</li><li>Полный иммунитет к кику за АФК</li></ul><div class="card-price-tag"><span class="coin-icon-gold">₣</span> 400 FC <span>/ мес</span></div><button class="btn-buy-priv" style="background: linear-gradient(90deg, rgba(255,170,0,0.15), rgba(255,170,0,0.35)); border-color: #ffaa00; color: #fff; text-shadow: 0 0 10px #ffaa00;" onclick="showToast('🛒 Недостаточно First Coins! Пополните баланс в личном кабинете')">Купить купон</button></div></div>
+<div class="item-card"><div class="shop-card-banner banner-moder"><div class="banner-text-3d">MODERATOR</div></div><div class="shop-card-body"><ul class="priv-features-list"><li>Доступ к базовому админ-меню</li><li>Права на мут и кик токсичных игроков</li><li>Отображение в списке администрации</li><li>Иммунитет к голосованиям за бан</li></ul><div class="card-price-tag"><span class="coin-icon-gold">₣</span> 550 FC <span>/ мес</span></div><button class="btn-buy-priv" style="background: linear-gradient(90deg, rgba(225,0,255,0.15), rgba(225,0,255,0.35)); border-color: #e100ff; color: #fff; text-shadow: 0 0 10px #e100ff;" onclick="showToast('🛒 Платёжная система настраивается')">Купить купон</button></div></div>
+<div class="item-card premium-tier"><div class="shop-card-banner banner-admin"><div class="banner-text-3d">ADMIN PANEL</div></div><div class="shop-card-body"><ul class="priv-features-list"><li>Полный доступ к управлению сервером</li><li>Управление банами, мутами и сменой карт</li><li>Право выдавать предупреждения модераторам</li><li>Эксклюзивный скин грозного агента</li></ul><div class="card-price-tag"><span class="coin-icon-gold">₣</span> 800 FC <span>/ мес</span></div><button class="btn-buy-priv" style="background: linear-gradient(90deg, rgba(255,0,85,0.15), rgba(255,0,85,0.35)); border-color: #ff0055; color: #fff; text-shadow: 0 0 10px #ff0055;" onclick="showToast('🛒 Платёжная система настраивается')">Купить купон</button></div></div>
+<div class="item-card premium-tier"><div class="shop-card-banner banner-sponsor"><div class="banner-text-3d">★ SPONSOR</div></div><div class="shop-card-body"><ul class="priv-features-list"><li>Ультимативный статус на всех серверах</li><li>Иммунитет от банов любых администраторов</li><li>Вход на server даже если все слоты забиты</li><li>Входной кастомный звук при подключении</li></ul><div class="card-price-tag"><span class="coin-icon-gold">₣</span> 1500 FC <span>/ мес</span></div><button class="btn-buy-priv" style="background: linear-gradient(90deg, rgba(255,234,0,0.15), rgba(255,234,0,0.35)); border-color: #ffea00; color: #fff; text-shadow: 0 0 10px #ffea00;" onclick="showToast('🛒 Недостаточно First Coins! Пополните баланс в личном кабинете')">Купить купон</button></div></div>
+</div></div>
+<div id="page-skins" class="page">
+    <div class="section-title">Скинченджер</div>
+    <div class="skin-top-center-tabs">
+        <button class="skin-center-tab-btn active" onclick="showToast('📦 Раздел: Оружие')">Оружие</button>
+        <button class="skin-center-tab-btn" onclick="showToast('📦 Раздел: Моя коллекция')">Моя коллекция</button>
+        <button class="skin-center-tab-btn" onclick="showToast('📦 Раздел: Топ сетов')">Топ сетов</button>
+    </div>
+    <div class="skin-page-layout">
+        <div class="skin-left-sidebar-menu">
+            <button class="skin-side-category-btn active" onclick="showToast('🔍 Сортировка: Все оружия')">🌐 Все оружия</button>
+            <button class="skin-side-category-btn" onclick="showToast('🔍 Сортировка: Пистолеты')">🔫 Пистолеты</button>
+            <button class="skin-side-category-btn" onclick="showToast('🔍 Сортировка: ПП')">⚙️ ПП</button>
+            <button class="skin-side-category-btn" onclick="showToast('🔍 Сортировка: Дробовики')">🪵 Дробовики</button>
+            <button class="skin-side-category-btn" onclick="showToast('🔍 Сортировка: Винтовки')">💥 Винтовки</button>
+            <button class="skin-side-category-btn" onclick="showToast('🔍 Сортировка: Ножи')">⚔️ Ножи</button>
+            <button class="skin-side-category-btn" onclick="showToast('🔍 Сортировка: Перчатки')">🧤 Перчатки</button>
+            <button class="skin-side-category-btn" onclick="showToast('🔍 Сортировка: Агенты')">🎭 Агенты</button>
+            <button class="skin-side-category-btn skin-btn-clear-inv" onclick="showToast('🗑️ Ваш текущий инвентарь успешно очищен!')">Очистить инвентарь</button>
+        </div>
+        <div class="skin-right-catalog-zone">
+            <div class="skins-grid">
+                <div class="skin-card" onclick="showToast('✨ Открытие скинов для GLOCK-18')"><div class="skin-img-box-placeholder">🔫</div><span class="skin-weapon-title-label">GLOCK-18</span></div>
+                <div class="skin-card" onclick="showToast('✨ Открытие скинов для USP-S')"><div class="skin-img-box-placeholder">🔫</div><span class="skin-weapon-title-label">USP-S</span></div>
+                <div class="skin-card" onclick="showToast('✨ Открытие скинов для P2000')"><div class="skin-img-box-placeholder">🔫</div><span class="skin-weapon-title-label">P2000</span></div>
+                <div class="skin-card" onclick="showToast('✨ Открытие скинов для DESERT EAGLE')"><div class="skin-img-box-placeholder">🦅</div><span class="skin-weapon-title-label">DESERT EAGLE</span></div>
+                <div class="skin-card" onclick="showToast('✨ Открытие скинов для AK-47')"><div class="skin-img-box-placeholder">🔥</div><span class="skin-weapon-title-label">AK-47</span></div>
+                <div class="skin-card" onclick="showToast('✨ Открытие скинов для M4A4')"><div class="skin-img-box-placeholder">🛡️</div><span class="skin-weapon-title-label">M4A4</span></div>
+                <div class="skin-card" onclick="showToast('✨ Открытие скинов для AWP')"><div class="skin-img-box-placeholder">🎯</div><span class="skin-weapon-title-label">AWP</span></div>
+                <div class="skin-card" onclick="showToast('✨ Открытие скинов для КЕРАМБИТА')"><div class="skin-img-box-placeholder">⚔️</div><span class="skin-weapon-title-label">КЕРАМБИТ</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="page-stats" class="page"><div class="section-title">Рейтинг игроков (Ранговая система)</div><table class="custom-table"><thead><tr><th>Место</th><th>Никнейм игрока</th><th>K/D Ratio</th><th>Убийства</th><th>В голову (%)</th><th>Часы</th></tr></thead><tbody><tr><td>🥇 1</td><td style="color:#fff; font-weight:bold;">s1mple_fan</td><td style="color:#00ff88; font-weight:bold;">1.84</td><td>4,250</td><td>62%</td><td>312 ч</td></tr><tr><td>🥈 2</td><td style="color:#fff; font-weight:bold;">donk_enjoyer</td><td style="color:#00ff88; font-weight:bold;">1.61</td><td>3,910</td><td>48%</td><td>198 ч</td></tr><tr><td>🥉 3</td><td style="color:#fff; font-weight:bold;">zywoo_clone</td><td style="color:#00ff88; font-weight:bold;">1.45</td><td>3,120</td><td>51%</td><td>154 ч</td></tr></tbody></table></div>
+<div id="page-clans" class="page"><div class="section-title">Клановый рейтинг проекта</div><table class="custom-table"><thead><tr style="color:#fff; background:rgba(0,0,0,0.25);"><th>Место</th><th>Название Клана</th><th>Тег команды</th><th>Очки рейтинга</th></tr></thead><tbody><tr><td>🏆 1</td><td style="color:#fff; font-weight:bold;">LEGACY ELITE</td><td style="color:var(--primary); font-weight:bold;">[LEET]</td><td>24,500</td></tr><tr><td>🥈 2</td><td style="color:#fff; font-weight:bold;">FEAR MONSTERS</td><td style="color:#ff0055; font-weight:bold;">[FEAR]</td><td>18,900</td></tr></tbody></table></div>
+<div id="page-recruit" class="page"><div class="section-title">Подать заявку в состав проекта (Набор 14+)</div><div class="custom-form-group"><label style="color:#fff; font-size:14px; font-weight:600;">Ваш игровой никнейм:</label><input type="text" class="custom-form-input" placeholder="Например: сыночек s1mtry"></div><div class="custom-form-group"><label style="color:#fff; font-size:14px; font-weight:600;">Ваш реальный возраст:</label><input type="number" class="custom-form-input" placeholder="Например: 14"></div><div class="custom-form-group"><label style="color:#fff; font-size:14px; font-weight:600;">Ссылка на Ваш профиль Steam:</label><input type="text" class="custom-form-input" placeholder="https://steamcommunity.com..."></div><button class="btn-steam-login" style="padding:12px 30px;" onclick="showToast('🟢 Ваша заявка успешно отправлена на рассмотрение!')">Отправить анкету</button></div>
+<div id="page-tickets" class="page"><div class="section-title">Техническая поддержка (Система Тикетов)</div><div class="custom-form-group"><label style="color:#fff; font-size:14px; font-weight:600;">Тема Вашего обращения:</label><input type="text" class="custom-form-input" placeholder="Жалоба на читера / Проблема с оплатой / Баг"></div><div class="custom-form-group"><label style="color:#fff; font-size:14px; font-weight:600;">Опишите проблему подробно:</label><textarea class="custom-form-input" style="height:120px; resize:none;" placeholder="Напишите суть Вашей проблемы здесь..."></textarea></div><button class="btn-steam-login" style="padding:12px 30px;" onclick="showToast('🟢 Тикет создан! Вы получите ответ в Telegram или Steam.')">Создать обращение</button></div>
+<div id="page-rules" class="page">
+    <div class="section-title">Высший состав администрации</div>
+    <div class="admin-flex">
+        <div class="admin-card"><h4>s1mtry</h4><span class="admin-role role-s1mtry">Основатель</span></div>
+        <div class="admin-card"><h4>SOLONIK</h4><span class="admin-role role-solonik">Высший Admin</span></div>
+        <div class="admin-card"><h4>wiki</h4><span class="admin-role role-wiki">Тех. админ</span></div>
+    </div>
+    <div class="section-title">Свод внутренних правил проекта</div>
+    <div class="rules-sub-title">1. Общие положения</div>
+    <table class="custom-table"><thead><tr><th>Пункт</th><th>Описание правила</th><th>Наказание</th></tr></thead><tbody>
+        <tr style="background: rgba(0,187,255,0.03); color: #fff; font-weight: bold;"><td>1.1</td><td>Слово Высшей Администрации портала (s1mtry, SOLONIK, wiki) имеет абсолютную силу и превосходит любые правила, написанные ниже.</td><td>БЕЗПЕПЕРИЙНОЕ РЕШЕНИЕ</td></tr>
+        <tr style="background: rgba(255,0,85,0.02); color: #fff;"><td>1.2</td><td>Любые устные или системные предупреждения игрокам за провинности выдаются в 3-х кратном размере.</td><td>X3 НАКАЗАНИЕ</td></tr>
+        <tr><td>1.3</td><td>Использование любого стороннего софта (AIM, WH, макросы, скрипты)</td><td>БАН НАВСЕГДА</td></tr>
+        <tr><td>1.4</td><td>Обход блокировок (заход через мультиаккаунты или активный VPN)</td><td>ПЕРМАНЕНТНЫЙ БАН</td></tr>
+    </tbody></table>
+    <div class="rules-sub-title">2. Правила общения и поведения на серверах</div>
+    <table class="custom-table"><thead><tr><th>Пункт</th><th>Описание нарушения в чате / микрофоне</th><th>Наказание</th></tr></thead><tbody>
+        <tr><td>2.1</td><td>Оскорбление игроков, сильная токсичность или разжигание межнациональной розни</td><td>МУТ НА 12 ЧАСОВ</td></tr>
+        <tr><td>2.2</td><td>Упоминание или жесткое оскорбление родных (в любой форме)</td><td>БАН НА СЕМЬ ДНЕЙ</td></tr>
+        <tr><td>2.3</td><td>Флуд, спам, крики или воспроизведение музыки в голосовой чат</td><td>МУТ НА 3 ЧАСА</td></tr>
+    </tbody></table>
+</div>
+<div class="project-footer-zone">
+    <div class="footer-column-block">
+        <h3 class="footer-column-title">Информация</h3>
+        <a href="#" class="footer-navigation-link" onclick="showToast('📑 Открытие Политики конфиденциальности...')">Политика конфиденциальности <span>&gt;</span></a>
+        <a href="#" class="footer-navigation-link" onclick="showToast('📑 Открытие Пользовательского соглашения...')">Пользовательское соглашение <span>&gt;</span></a>
+        <a href="#" class="footer-navigation-link" onclick="showToast('📑 Открытие Политики безопасности...')">Политика безопасности <span>&gt;</span></a>
+        <a href="#" class="footer-navigation-link" onclick="showToast('📑 Открытие Договора оферты...')">Договор оферты <span>&gt;</span></a>
+    </div>
+    <div class="footer-column-block">
+        <h3 class="footer-column-title">Поддержка</h3>
+        <a href="#" class="footer-navigation-link" onclick="switchPage('tickets', document.querySelector('.btn-tickets-panel'))">Техническая поддержка <span>&gt;</span></a>
+        <div class="footer-status-badge"><div class="footer-status-dot"></div> Статус серверов: СТАБИЛЕН (100%)</div>
+    </div>
+</div>
+</div></div>
+<script>
+function switchPage(pageId, btn) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active')); document.getElementById('page-' + pageId).classList.add('active'); if(btn) btn.classList.add('active'); if (pageId !== 'main') { closeMode(); } }
+function openMode(mode) { document.getElementById('modesSelector').style.opacity = '0'; setTimeout(() => { document.getElementById('modesSelector').style.display = 'none'; const container = document.getElementById('servers-' + mode); if (container) { container.style.display = 'block'; setTimeout(() => { container.classList.add('active'); }, 20); } }, 200); }
+function closeMode() { document.querySelectorAll('.servers-container').forEach(container => { container.classList.remove('active'); container.style.display = 'none'; }); document.getElementById('modesSelector').style.display = 'grid'; setTimeout(() => { document.getElementById('modesSelector').style.opacity = '1'; }, 20); }
+function showToast(text) { const toast = document.getElementById('toast'); toast.innerText = text; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
+function redirectToSteam() { showToast("🔗 Подключение к серверам Steam API..."); setTimeout(() => { document.getElementById('steamArea').innerHTML = `<div class="user-profile-block"><div class="user-avatar" style="background-image: url('https://yandex.net');"></div><div class="user-info-text"><span class="user-name-title">сыночек s1mtry</span><span class="user-steam-id">7656119870656785</span><span class="user-coin-balance"><span class="coin-icon-gold">₣</span> 1,250 FC</span></div><span class="user-badge-role">OP</span></div>`; showToast("🟢 Авторизация Steam успешно выполнена!"); }, 1200); }
+</script>
+</body>
+</html>
